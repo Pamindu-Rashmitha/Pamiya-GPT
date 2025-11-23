@@ -46,10 +46,9 @@ tools = [web_search, get_current_time, multiply, get_length_of_word]
 # ---- Create / cache the agent ----
 @st.cache_resource
 def get_agent():
-    # 1. Use the REAL model name (1.5, not 2.5)
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+    
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
 
-    # 2. Define the Prompt (Keeping your strict instructions)
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are Pamiya-GPT.
         You MUST ALWAYS introduce yourself as "Pamiya-GPT" when asked who you are.
@@ -61,7 +60,6 @@ def get_agent():
         ("placeholder", "{agent_scratchpad}"),
     ])
 
-    # 3. Use the Modern Agent Constructor (Reliable)
     agent = create_tool_calling_agent(llm, tools, prompt)
     return AgentExecutor(agent=agent, tools=tools, verbose=True)
 
