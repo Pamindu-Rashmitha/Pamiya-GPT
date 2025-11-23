@@ -1,11 +1,13 @@
 streamlit
-langchain
-langchain-core
-langchain-community
-langchain-google-genai
-google-generativeai
-duckduckgo-search
+langchain==0.2.14
+langchain-core==0.2.22
+langchain-community==0.2.10
+langchain-google-genai==0.2.0
+google-generativeai==0.5.4
+duckduckgo-search==6.1.0
 python-dotenv
+protobuf==4.25.3
+
 
 
 
