@@ -1,8 +1,11 @@
-streamlit==1.38.0
+streamlit
+langchain
+langchain-core
+langchain-community
+langchain-google-genai
 google-generativeai
-langchain==0.2.16
-langchain-community==0.2.16
-langchain-core==0.2.38
-langchain-google-genai==1.0.10
 duckduckgo-search
+python-dotenv
+
+
 
