@@ -6,18 +6,18 @@ import pandas as pd
 from pypdf import PdfReader
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.tools import tool
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_community.tools import DuckDuckGoSearchRun
+from langchain_core.messages import HumanMessage, AIMessage
 
-st.set_page_config(page_title="Pamiya-GPT Final", page_icon="🤖")
-st.title("🤖 Pamiya-GPT: The All-in-One Agent")
+st.set_page_config(page_title="Pamiya-GPT v5", page_icon="🧠")
+st.title("🧠 Pamiya-GPT: The Smart Agent")
 
 # ---- CONFIG & SECRETS ----
 if "GOOGLE_API_KEY" in st.secrets:
     os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
 
-# Check for Email Creds
 EMAIL_ENABLED = False
 if "EMAIL_ADDRESS" in st.secrets and "EMAIL_PASSWORD" in st.secrets:
     EMAIL_ENABLED = True
@@ -39,20 +39,16 @@ if csv_file:
     st.sidebar.success("CSV Saved!")
 
 # ---- TOOLS ----
-
 @tool
 def send_email(recipient: str, subject: str, body: str) -> str:
     """Sends an email to the specified recipient."""
     if not EMAIL_ENABLED:
-        return f"[SIMULATION MODE] Email to {recipient} NOT sent (No credentials found).\nSubject: {subject}\nBody: {body}"
-    
+        return f"[SIMULATION MODE] Email to {recipient} NOT sent (No credentials).\nSubject: {subject}\nBody: {body}"
     try:
         msg = MIMEText(body)
         msg['Subject'] = subject
         msg['From'] = EMAIL_ADDRESS
         msg['To'] = recipient
-
-        # Connect to Gmail Server (Change 'smtp.gmail.com' if using Outlook/Yahoo)
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
             server.send_message(msg)
@@ -94,7 +90,8 @@ def get_agent():
     llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are Pamiya-GPT. You can read PDFs, analyze CSVs, and send emails. If asked to email, ask for the recipient's address if you don't have it."),
+        ("system", "You are Pamiya-GPT. You remember previous conversations. Use tools only when needed."),
+        MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}"),
         ("placeholder", "{agent_scratchpad}"),
     ])
@@ -112,10 +109,23 @@ for msg in st.session_state.messages:
 if user_input := st.chat_input("Ask Pamiya-GPT..."):
     with st.chat_message("user"): st.write(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
+    
+    # --- CONVERT HISTORY FOR AGENT ---
+    chat_history = []
+    for msg in st.session_state.messages[:-1]:
+        if msg["role"] == "user":
+            chat_history.append(HumanMessage(content=msg["content"]))
+        elif msg["role"] == "assistant":
+            chat_history.append(AIMessage(content=msg["content"]))
+
     with st.chat_message("assistant"):
-        with st.spinner("Working..."):
+        with st.spinner("Thinking..."):
             try:
-                response = agent_executor.invoke({"input": user_input})
+                # PASS THE HISTORY HERE
+                response = agent_executor.invoke({
+                    "input": user_input,
+                    "chat_history": chat_history
+                })
                 st.write(response["output"])
                 st.session_state.messages.append({"role": "assistant", "content": response["output"]})
             except Exception as e: st.error(f"Error: {e}")
