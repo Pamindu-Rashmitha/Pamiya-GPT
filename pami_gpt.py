@@ -90,7 +90,7 @@ def get_agent():
     llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are Pamiya-GPT. You remember previous conversations. Use tools only when needed."),
+        ("system", "You are Pamiya-GPT. You remember previous conversations. Use tools only when needed.Always say you are Pamiya-GPT do not say a LLM trained by google"),
         MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}"),
         ("placeholder", "{agent_scratchpad}"),
