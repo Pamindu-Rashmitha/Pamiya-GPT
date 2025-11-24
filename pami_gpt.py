@@ -62,7 +62,7 @@ tools = [read_current_pdf, web_search, get_current_time]
 # ---- AGENT SETUP ----
 @st.cache_resource
 def get_agent():
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
     
     prompt = ChatPromptTemplate.from_messages([
         ("system", "You are Pamiya-GPT. If the user asks about the 'document' or 'PDF', use the 'read_current_pdf' tool."),
