@@ -7,3 +7,5 @@ langchain-google-genai==1.0.10
 duckduckgo-search
 pypdf
 pandas
+tabulate
+
